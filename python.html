@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive PyScript Python Interpreter</title>
+    <!-- Include the PyScript library -->
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #interpreter {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            width: 80%;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid #ddd;
+        }
+        #input-area {
+            display: flex;
+            margin-top: 10px;
+        }
+        #input-area input {
+            flex: 1;
+            padding: 5px;
+        }
+        #input-area button {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive PyScript Python Interpreter</h1>
+    <div id="interpreter"></div>
+    <div id="input-area">
+        <input type="text" id="code-input" placeholder="Enter Python code">
+        <button id="run-code">Run</button>
+    </div>
+
+    <!-- PyScript code -->
+    <py-script>
+        import sys
+        from pyodide.ffi import create_proxy
+        
+        # Initialize the output area
+        interpreter_output = Element("interpreter")
+        code_input = Element("code-input")
+        
+        # Function to capture print statements
+        class Output:
+            def __init__(self):
+                self.buffer = ""
+            def write(self, s):
+                self.buffer += s
+                interpreter_output.element.innerText = self.buffer
+        
+        sys.stdout = Output()
+        
+        def run_code(event):
+            code = code_input.element.value
+            if code.strip() == "":
+                return
+            try:
+                exec(code, globals())
+            except Exception as e:
+                print(f"Error: {e}")
+            code_input.element.value = ""
+        
+        run_code_proxy = create_proxy(run_code)
+        Element("run-code").element.addEventListener("click", run_code_proxy)
+    </py-script>
+</body>
+</html>
